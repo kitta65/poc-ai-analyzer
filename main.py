@@ -1,6 +1,16 @@
 import streamlit as st
 from constants.role import Role
+from pydantic_ai import Agent
 
+
+@st.cache_resource
+def get_agent(model: str):
+    return Agent(model, instructions="Be concise, reply with one sentence.")
+
+
+MODEL = "openai:gpt-4.1-mini"
+
+agent = get_agent(MODEL)
 
 # ----- config -----
 st.set_page_config(
@@ -23,7 +33,8 @@ if prompt := st.chat_input("Ask anything about data analysis"):
     st.session_state.messages.append({"role": Role.USER.value, "content": prompt})
 
     with st.chat_message(Role.ASSISTANT.value):
-        response = st.write_stream("Hi I'm your AI assistant!")
+        response = agent.run_sync(prompt)
+        st.write(response.output)
     st.session_state.messages.append(
-        {"role": Role.ASSISTANT.value, "content": response}
+        {"role": Role.ASSISTANT.value, "content": response.output}
     )
