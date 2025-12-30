@@ -10,6 +10,7 @@ cubes:
         sql: "{CUBE}.id"
         primary_key: true
         type: string
+        description: Unique ID of the event
 
       - name: city
         sql: "{CUBE}.city"
