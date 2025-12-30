@@ -1,0 +1,50 @@
+cubes:
+  - name: orders
+    sql_table: bigquery-public-data.thelook_ecommerce.orders
+    data_source: default
+
+    joins:
+      - name: users
+        sql: "{orders}.user_id = {users}.id"
+        relationship: many_to_one
+
+    dimensions:
+      - name: order_id
+        sql: "{CUBE}.order_id"
+        primary_key: true
+        type: string
+
+      - name: user_id
+        sql: "{CUBE}.user_id"
+        type: string
+
+      - name: created_at
+        sql: "{CUBE}.created_at"
+        type: time
+
+    measures:
+      - name: count
+        type: count
+
+      - name: count_user
+        type: count_distinct
+        sql: "{CUBE}.user_id"
+
+      # multi-stage calculations (prior date)
+      # see https://cube.dev/docs/product/data-modeling/concepts/multi-stage-calculations#prior-date
+      - name: count_prev_year
+        multi_stage: true
+        sql: "{count}"
+        type: number
+        time_shift:
+          - time_dimension: created_at
+            interval: 1 year
+            type: prior
+      - name: ratio_count_yoy
+        multi_stage: true
+        sql: "{count} / {count_prev_year}"
+        type: number
+
+    pre_aggregations:
+      # Pre-aggregation definitions go here.
+      # Learn more in the documentation: https://cube.dev/docs/caching/pre-aggregations/getting-started

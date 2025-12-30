@@ -1,0 +1,35 @@
+cubes:
+  - name: events
+    sql_table: bigquery-public-data.thelook_ecommerce.events
+    data_source: default
+
+    joins: []
+
+    dimensions:
+      - name: id
+        sql: "{CUBE}.id"
+        primary_key: true
+        type: string
+
+      - name: city
+        sql: "{CUBE}.city"
+        type: string
+
+      - name: created_at
+        sql: "{CUBE}.created_at"
+        type: time
+
+    measures:
+      - name: count
+        type: count
+
+    pre_aggregations:
+      # Pre-aggregation definitions go here.
+      # Learn more in the documentation: https://cube.dev/docs/caching/pre-aggregations/getting-started
+
+  - name: cancels
+    extends: events
+    sql: |
+      select *
+      from {events.sql()}
+      where event_type = "cancel"

@@ -1,0 +1,69 @@
+cubes:
+  - name: users
+    sql_table: bigquery-public-data.thelook_ecommerce.users
+    data_source: default
+
+    joins: []
+
+    dimensions:
+      - name: id
+        sql: "{CUBE}.id"
+        primary_key: true
+        type: string
+
+      - name: email
+        sql: "{CUBE}.email"
+        type: string
+
+      - name: gender
+        sql: "{CUBE}.gender"
+        type: string
+
+      - name: first_name
+        sql: "{CUBE}.first_name"
+        type: string
+
+      - name: last_name
+        sql: "{CUBE}.last_name"
+        type: string
+
+      # proxy dimension (members of the same cube)
+      # see https://cube.dev/docs/product/data-modeling/concepts/calculated-members#members-of-the-same-cube
+      - name: full_name
+        sql: "{first_name} || ' ' || {last_name}"
+        type: string
+
+      # subquery dimension
+      # see https://cube.dev/docs/product/data-modeling/concepts/calculated-members#subquery-dimensions
+      - name: count_order
+        # `ifnull({orders.count}, 0)` does not work here!
+        sql: "{orders.count}"
+        type: number
+        sub_query: true
+
+    measures:
+      - name: count
+        type: count
+
+      - name: count_male
+        type: count
+        filters:
+          - sql: "{CUBE}.gender = 'M'"
+
+      - name: count_female
+        type: count
+        filters:
+          - sql: "{CUBE}.gender = 'F'"
+
+      # calculated measure
+      # see https://cube.dev/docs/product/data-modeling/concepts/calculated-members#calculated-measures
+      - name: ratio_male
+        type: number
+        sql: "{count_male} / {count}"
+      - name: ratio_female
+        type: number
+        sql: "{count_female} / {count}"
+
+    pre_aggregations:
+      # Pre-aggregation definitions go here.
+      # Learn more in the documentation: https://cube.dev/docs/caching/pre-aggregations/getting-started
