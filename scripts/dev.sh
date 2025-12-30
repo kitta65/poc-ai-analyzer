@@ -3,6 +3,14 @@ set -euo pipefail
 cd $(git rev-parse --show-toplevel)
 
 cube_container_name="cube-dev-container"
+
+function cleanup() {
+  echo 'start cleanup'
+  docker container stop $cube_container_name
+  echo 'finish cleanup'
+}
+trap cleanup INT
+
 docker container run \
   -d \
   --rm \
