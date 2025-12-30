@@ -1,16 +1,15 @@
 import streamlit as st
 from constants.role import Role
-from pydantic_ai import Agent
+from agents.root import get_root_agent
 
 
 @st.cache_resource
-def get_agent(model: str):
-    return Agent(model, instructions="Be concise, reply with one sentence.")
+def init():
+    return [get_root_agent()]
 
 
-MODEL = "openai:gpt-4.1-mini"
+(agent,) = init()
 
-agent = get_agent(MODEL)
 
 # ----- config -----
 st.set_page_config(
