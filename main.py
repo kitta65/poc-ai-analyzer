@@ -1,6 +1,6 @@
 import streamlit as st
-from agents.graphql import graphql_agent
-from models.message import MessageSchema, MessageType, MessageRole
+from app.agents import graphql_agent
+from app.models import MessageSchema, MessageType, MessageRole
 
 
 # ----- config -----
