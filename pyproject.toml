@@ -9,3 +9,8 @@ dependencies = [
     "pydantic-ai>=1.39.0",
     "streamlit>=1.52.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
