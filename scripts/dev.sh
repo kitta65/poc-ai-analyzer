@@ -23,4 +23,8 @@ docker container run \
   -p 15432:15432 \
   -v ./cube:/cube/conf \
   cubejs/cube:v1.3.54
+
+# wait for cube to start
+sleep 3
+
 uv run streamlit run --server.headless true main.py

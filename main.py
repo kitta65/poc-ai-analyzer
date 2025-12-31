@@ -1,14 +1,6 @@
 import streamlit as st
-from constants.role import Role
-from agents.root import get_root_agent
-
-
-@st.cache_resource
-def init():
-    return [get_root_agent()]
-
-
-(agent,) = init()
+from agents.graphql import graphql_agent
+from models.message import MessageSchema, MessageType, MessageRole
 
 
 # ----- config -----
@@ -20,21 +12,29 @@ st.title("PoC of AI Analyzer")
 # ----- initialize -----
 if "messages" not in st.session_state:
     st.session_state.messages = []
+messages: list[MessageSchema] = st.session_state.messages
 
 # ----- chat -----
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+for message in messages:
+    with st.chat_message(message.role.value):
+        if message.type == MessageType.GRAPHQL:
+            st.code(message.content, language="graphql")
+        else:
+            st.write(message.content)
 
 if prompt := st.chat_input("Ask anything about data analysis"):
-    with st.chat_message(Role.USER.value):
+    with st.chat_message(MessageRole.USER.value):
         st.markdown(prompt)
-    st.session_state.messages.append({"role": Role.USER.value, "content": prompt})
+    messages.append(
+        MessageSchema(role=MessageRole.USER, type=MessageType.MESSAGE, content=prompt)
+    )
 
-    with st.chat_message(Role.ASSISTANT.value):
-        stream = agent.run_stream_sync(prompt)
-        response = st.write_stream(stream.stream_text(delta=True))
+    with st.chat_message(MessageRole.ASSISTANT.value):
+        query = graphql_agent.run_sync(prompt).output
+        response = st.code(query, language="graphql")
 
-    st.session_state.messages.append(
-        {"role": Role.ASSISTANT.value, "content": response}
+    messages.append(
+        MessageSchema(
+            role=MessageRole.ASSISTANT, type=MessageType.GRAPHQL, content=query
+        )
     )
