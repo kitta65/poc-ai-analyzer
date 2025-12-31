@@ -9,6 +9,7 @@ class MessageRole(Enum):
 
 
 class MessageType(Enum):
+    JSON = "json"
     MESSAGE = "message"
     GRAPHQL = "graphql"
 

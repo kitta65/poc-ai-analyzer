@@ -1,8 +1,10 @@
+import altair as alt
 import logging
 import requests
 import streamlit as st
 
 from app.agents.graphql import graphql_agent
+from app.agents.vegalite import vegalite_agent
 from app.models.message import MessageSchema, MessageType, MessageRole
 from app.constants import CUBE_API
 
@@ -48,13 +50,14 @@ if prompt := st.chat_input("Ask anything about data analysis"):
 
     with st.chat_message(MessageRole.ASSISTANT.value):
         with st.spinner("Just a moment..."):
-            query = graphql_agent.run_sync(prompt).output
-        with st.expander("See generated GraphQL query"):
-            st.code(query, language="graphql")
-        st.write(get_data_by_query(query))
+            output = vegalite_agent.run_sync(prompt).output
+            schema = output.model_dump_json()
+        st.code(schema, language="json")
+        st.write("Chart Preview:")
+        # chart = alt.Chart().from_json(schema)
+        chart = alt.Chart().from_dict(output.model_dump())
+        st.vega_lite_chart(chart.to_dict())
 
     messages.append(
-        MessageSchema(
-            role=MessageRole.ASSISTANT, type=MessageType.GRAPHQL, content=query
-        )
+        MessageSchema(role=MessageRole.ASSISTANT, type=MessageType.JSON, content=schema)
     )
