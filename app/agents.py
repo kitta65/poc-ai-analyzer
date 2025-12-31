@@ -55,8 +55,13 @@ NOTE: The backticks themselves are not necessary! They are only used here to enc
 query {{
   cube {{
     users {{
-      gender
       count
+      gender
+    }}
+    orders {{
+      created_at {{
+        day
+      }}
     }}
   }}
 }}
