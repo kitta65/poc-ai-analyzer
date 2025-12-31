@@ -1,3 +1,4 @@
+import logging
 import requests
 import streamlit as st
 
@@ -5,11 +6,17 @@ from app.agents import graphql_agent
 from app.models import MessageSchema, MessageType, MessageRole
 from app.constants import CUBE_API
 
+logger = logging.getLogger("ai-analyzer")
+
 
 @st.cache_data()
 def get_data_by_query(query: str) -> dict:
-    response = requests.post(f"{ CUBE_API }/graphql", json={"query": query})
-    return response.json()
+    response = requests.post(f"{CUBE_API}/graphql", json={"query": query})
+    dict_ = response.json()
+    if dict_.get("data") is None:
+        logger.info(f"status_code: {response.status_code}")
+        logger.info(f"text: {response.text}")
+    return dict_
 
 
 # ----- config -----
