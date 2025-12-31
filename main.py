@@ -1,9 +1,12 @@
 import logging
+
+import pandas as pd
 import requests
 import streamlit as st
 
 from app.agents.graphql import graphql_agent
-from app.models import MessageSchema, MessageType, MessageRole
+from app.agents.vegalite import vegalite_agent
+from app.models.message import MessageSchema, MessageType, MessageRole
 from app.constants import CUBE_API
 
 logger = logging.getLogger("ai-analyzer")
@@ -51,7 +54,15 @@ if prompt := st.chat_input("Ask anything about data analysis"):
             query = graphql_agent.run_sync(prompt).output
         with st.expander("See generated GraphQL query"):
             st.code(query, language="graphql")
-        st.write(get_data_by_query(query))
+        data = get_data_by_query(query)
+        st.write(data)
+        df = pd.DataFrame(data["data"])
+        schema = vegalite_agent.run_sync(
+            prompt, deps=pd.DataFrame(data["data"])
+        ).output.model_dump()
+        st.write(schema)
+        st.write(df)
+        st.vega_lite_chart(df, schema)
 
     messages.append(
         MessageSchema(
