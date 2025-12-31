@@ -1,6 +1,3 @@
 {
-  "python.analysis.typeCheckingMode": "basic",
-  "python.analysis.exclude": [
-    "app/models/vegalite.py"
-  ]
+  "python.analysis.typeCheckingMode": "basic"
 }

@@ -3,7 +3,6 @@ generated/
 
 # Python
 *.pyc
-app/models/vegalite.py
 
 # Cube
 .cubestore/
