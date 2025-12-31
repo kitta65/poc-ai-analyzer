@@ -75,9 +75,13 @@ graphql_agent = Agent(
 
 @graphql_agent.output_validator
 def validate_graphql_query(output: str) -> str:
+    errs = []
     try:
-        validate(SCHEMA, parse(output))
+        errs = validate(SCHEMA, parse(output))
     except Exception as e:
         raise ModelRetry(f"Invalid GraphQL query: {e}")
+
+    if 0 < len(errs):
+        raise ModelRetry(f"Invalid GraphQL query: {errs}")
 
     return output
