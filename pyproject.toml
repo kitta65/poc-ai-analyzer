@@ -9,3 +9,8 @@ dependencies = [
     "pydantic-ai>=1.39.0",
     "streamlit>=1.52.2",
 ]
+
+[dependency-groups]
+dev = [
+    "datamodel-code-generator>=0.50.0",
+]

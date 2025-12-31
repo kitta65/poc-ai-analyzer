@@ -3,7 +3,7 @@ import requests
 import streamlit as st
 
 from app.agents.graphql import graphql_agent
-from app.models import MessageSchema, MessageType, MessageRole
+from app.models.message import MessageSchema, MessageType, MessageRole
 from app.constants import CUBE_API
 
 logger = logging.getLogger("ai-analyzer")
