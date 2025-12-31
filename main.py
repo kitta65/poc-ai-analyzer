@@ -1,6 +1,8 @@
 import streamlit as st
+
 from app.agents import graphql_agent
 from app.models import MessageSchema, MessageType, MessageRole
+from app.constants import CUBE_API
 
 
 # ----- config -----
@@ -30,8 +32,10 @@ if prompt := st.chat_input("Ask anything about data analysis"):
     )
 
     with st.chat_message(MessageRole.ASSISTANT.value):
-        query = graphql_agent.run_sync(prompt).output
-        response = st.code(query, language="graphql")
+        with st.spinner("Just a moment..."):
+            query = graphql_agent.run_sync(prompt).output
+        with st.expander("See generated GraphQL query"):
+            st.code(query, language="graphql")
 
     messages.append(
         MessageSchema(
