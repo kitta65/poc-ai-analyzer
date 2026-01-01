@@ -6,6 +6,7 @@ import streamlit as st
 
 from app.agents.router import run_router_agent_with_log
 from app.models.message import MessageSchema, MessageType, MessageRole
+from app.agents.router import UnableToProceedRequest
 
 
 def show(message: MessageSchema) -> None:
@@ -58,6 +59,17 @@ if prompt := st.chat_input("Ask anything about data analysis"):
 
     with st.spinner("Generating..."):
         response = run_router_agent_with_log(prompt)
+
+    if isinstance(response.output, UnableToProceedRequest):
+        unable_message = MessageSchema(
+            role=MessageRole.ASSISTANT,
+            type=MessageType.PLAIN,
+            content=f"Unable to proceed: {response.output.reason}",
+        )
+        show(unable_message)
+        messages.append(unable_message)
+        st.stop()
+
     query_message = MessageSchema(
         role=MessageRole.ASSISTANT,
         type=MessageType.GRAPHQL,

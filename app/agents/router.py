@@ -36,6 +36,12 @@ Always use the tool to get the current date.
 """
 
 
+class UnableToProceedRequest(BaseModel):
+    """Schema to indicate that the agent is unable to proceed with the request (e.g. insufficient information)"""
+
+    reason: str
+
+
 class RouterSchema(BaseModel):
     graphql: str
     data: list[dict[str, Any]]
@@ -64,7 +70,7 @@ router_agent = Agent(
     BASE_MODEL,
     model_settings=ModelSettings(),
     instructions=INSTRUCTIONS,
-    output_type=run_other_agent,
+    output_type=[run_other_agent, UnableToProceedRequest],
 )
 
 
