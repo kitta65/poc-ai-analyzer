@@ -1,17 +1,12 @@
 import logging
 from datetime import datetime
 
+import pandas as pd
 import streamlit as st
 
-from app.agents.graphql import run_graphql_agent_with_log
-from app.agents.vegalite import run_vegalite_agent_with_log
+from app.agents.router import run_router_agent_with_log
 from app.models.message import MessageSchema, MessageType, MessageRole
-from app.cube import get_df_by_query
-
-
-@st.cache_data
-def _get_df_by_query(query):
-    return get_df_by_query(query)
+from app.agents.router import UnableToProceedRequest
 
 
 def _show(message: MessageSchema) -> None:
@@ -63,18 +58,29 @@ if prompt := st.chat_input("Ask anything about data analysis"):
     show(prompt_message)
     messages.append(prompt_message)
 
-    with st.spinner("Generating GraphQL Query..."):
-        query = run_graphql_agent_with_log(prompt).output
+    with st.spinner("Generating..."):
+        response = run_router_agent_with_log(prompt)
+
+    if isinstance(response.output, UnableToProceedRequest):
+        unable_message = MessageSchema(
+            role=MessageRole.ASSISTANT,
+            type=MessageType.PLAIN,
+            content=f"Unable to proceed: {response.output.reason}",
+        )
+        show(unable_message)
+        messages.append(unable_message)
+        st.stop()
+
     query_message = MessageSchema(
         role=MessageRole.ASSISTANT,
         type=MessageType.GRAPHQL,
-        content=query,
+        content=response.output.graphql,
         expander_text="Show GraphQL Query",
     )
     show(query_message)
     messages.append(query_message)
 
-    df = _get_df_by_query(query)
+    df = pd.DataFrame(response.output.data)
     df_message = MessageSchema(
         role=MessageRole.ASSISTANT,
         type=MessageType.OTHER,
@@ -84,8 +90,7 @@ if prompt := st.chat_input("Ask anything about data analysis"):
     show(df_message)
     messages.append(df_message)
 
-    with st.spinner("Generating Vega-Lite JSON..."):
-        vegalite = run_vegalite_agent_with_log(prompt, df).output.model_dump()
+    vegalite = response.output.vegalite.model_dump()
     vegalite_message = MessageSchema(
         role=MessageRole.ASSISTANT,
         type=MessageType.OTHER,
@@ -95,4 +100,5 @@ if prompt := st.chat_input("Ask anything about data analysis"):
     show(vegalite_message)
     messages.append(vegalite_message)
 
+    # TODO: enable to show after rerun
     st.vega_lite_chart(df, vegalite)
