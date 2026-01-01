@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 
 class MarkSchema(BaseModel):
-    type: Literal["circle", "bar"]
+    type: Literal["circle", "bar", "line"]
 
 
 class FieldSchema(BaseModel):

@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
+
 import streamlit as st
-from typing import Final
 
 from app.agents.graphql import run_graphql_agent_with_log
 from app.agents.vegalite import run_vegalite_agent_with_log
@@ -39,7 +39,11 @@ messages: list[MessageSchema] = st.session_state.messages
 
 if "session_id" not in st.session_state:
     st.session_state.session_id = datetime.now().strftime("%Y%m%d%H%M%S")
-logging.basicConfig(filename=f"logs/{st.session_state.session_id}.log", level="INFO")
+    logging.basicConfig(
+        filename=f"logs/{st.session_state.session_id}.log",
+        level=logging.INFO,
+        force=True, # required in streamlit
+    )
 
 st.caption(f"Session ID: {st.session_state.session_id}")
 
