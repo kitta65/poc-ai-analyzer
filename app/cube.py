@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -5,6 +6,19 @@ import requests
 from .logging import logger
 
 CUBE_API = "http://localhost:4000/cubejs-api"
+
+# read cube definitions
+MODEL_DIR = Path.cwd() / "cube" / "model" / "cubes"
+MODEL_CODE_BLOCKS = []
+for file in MODEL_DIR.iterdir():
+    if file.suffix == ".yml":
+        with open(MODEL_DIR / file, "r") as f:
+            MODEL_CODE_BLOCKS.append(f"""\
+```
+#----- {file.name}-----
+{f.read()}
+```
+""")
 
 
 def get_data_by_query(query: str) -> list[dict[str, Any]]:
