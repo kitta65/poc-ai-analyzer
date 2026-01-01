@@ -11,7 +11,6 @@ class MessageRole(Enum):
 
 
 class MessageType(Enum):
-    LOG = "log"
     GRAPHQL = "graphql"
     PLAIN = "plain"
     OTHER = "other"
