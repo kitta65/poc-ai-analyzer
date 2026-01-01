@@ -6,7 +6,7 @@ from .logging import logger
 from ..models.vegalite import VegaLiteSchema
 
 
-INSTRUCTIONS = f"""\
+INSTRUCTIONS = """\
 You are an excellent data visualization assistant.
 Generate JSON in Vega-Lite format based on the user's request.
 """
@@ -21,7 +21,7 @@ vegalite_agent = Agent(
 )
 
 
-@vegalite_agent.system_prompt
+@vegalite_agent.instructions
 def add_dataframe_schema(ctx: RunContext[pd.DataFrame]) -> str:
     return f"""\
 The data columns and types are as follows.
