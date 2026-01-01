@@ -1,4 +1,5 @@
 from typing import Any
+from datetime import datetime
 
 import pandas as pd
 from pydantic import BaseModel
@@ -13,14 +14,20 @@ from ..cube import get_data_by_query
 
 
 # TODO: tell the model definitions of Cube
-# TODO: tell the agent current date
 INSTRUCTIONS = """\
 You are an excellent analytics assistant.
 Fully understand the user's intent and give instructions to other agents.
+You will work with the following two agents:
+
+1. GraphQL Agent: This agent generates a GraphQL query to retrieve data from the Cube backend.
+2. VegaLite Agent: This agent generates a Vega-Lite specification to visualize the data retrieved by the GraphQL query.
 
 If the user's description is ambiguous, ask for additional information.
 For example, "I want to visualize the number of active users by day" is not specific enough.
 In this case, ask questions like "Do you mean active users as the number of users who placed orders? Or the number of users who generated an event log?"
+
+If the user does not specify a period, use the most recent year as the aggregation period.
+Always use the tool to get the current date.
 """
 
 
@@ -54,6 +61,12 @@ router_agent = Agent(
     instructions=INSTRUCTIONS,
     output_type=run_other_agent,
 )
+
+
+@router_agent.tool_plain
+def get_current_date() -> str:
+    """Get the current date in YYYY-MM-DD format"""
+    return datetime.now().strftime("%Y-%m-%d")
 
 
 def run_router_agent_with_log(prompt: str):
