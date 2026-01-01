@@ -10,7 +10,7 @@ from pydantic_ai import Agent, ModelSettings, ModelRetry
 import requests
 
 from .common import BASE_MODEL
-from ..constants import CUBE_API
+from ..cube import CUBE_API
 
 
 def get_schema() -> GraphQLSchema:
