@@ -14,16 +14,21 @@ def _get_df_by_query(query):
     return get_df_by_query(query)
 
 
+def _show(message: MessageSchema) -> None:
+    match message.type:
+        case MessageType.GRAPHQL:
+            st.code(message.content, language="graphql")
+        case _:
+            st.write(message.content)
+
+
 def show(message: MessageSchema) -> None:
     with st.chat_message(message.role.value):
-        writer = st
-        if message.expander_text:
-            writer = st.expander(message.expander_text)
-        match message.type:
-            case MessageType.GRAPHQL:
-                writer.code(message.content, language="graphql")
-            case _:
-                writer.write(message.content)
+        if message.expander_text is not None:
+            with st.expander(message.expander_text):
+                _show(message)
+        else:
+            _show(message)
 
 
 # ----- config -----
@@ -42,18 +47,14 @@ if "session_id" not in st.session_state:
     logging.basicConfig(
         filename=f"logs/{st.session_state.session_id}.log",
         level=logging.INFO,
-        force=True, # required in streamlit
+        force=True,  # required in streamlit
     )
 
 st.caption(f"Session ID: {st.session_state.session_id}")
 
 # ----- chat -----
 for message in messages:
-    with st.chat_message(message.role.value):
-        if message.type == MessageType.GRAPHQL:
-            st.code(message.content, language="graphql")
-        else:
-            st.write(message.content)
+    show(message)
 
 if prompt := st.chat_input("Ask anything about data analysis"):
     prompt_message = MessageSchema(
