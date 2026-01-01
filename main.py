@@ -29,7 +29,7 @@ messages: list[MessageSchema] = st.session_state.messages
 
 if "session_id" not in st.session_state:
     st.session_state.session_id = datetime.now().strftime("%Y%m%d%H%M%S")
-logging.basicConfig(filename=f"logs/{st.session_state.session_id}.log")
+logging.basicConfig(filename=f"logs/{st.session_state.session_id}.log", level="INFO")
 
 st.caption(f"Session ID: {st.session_state.session_id}")
 

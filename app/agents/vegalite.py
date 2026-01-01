@@ -42,4 +42,6 @@ def run_vegalite_agent_with_log(prompt: str, df: pd.DataFrame):
                 logger.error(m)
             raise e
 
+        for m in response.all_messages():
+            logger.info(m)
         return response

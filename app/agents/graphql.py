@@ -97,4 +97,6 @@ def run_graphql_agent_with_log(prompt: str):
                 logger.error(m)
             raise e
 
+        for m in response.all_messages():
+            logger.info(m)
         return response
