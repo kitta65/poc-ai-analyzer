@@ -14,6 +14,18 @@ def _get_df_by_query(query):
     return get_df_by_query(query)
 
 
+def show(message: MessageSchema) -> None:
+    with st.chat_message(message.role.value):
+        writer = st
+        if message.expander_text:
+            writer = st.expander(message.expander_text)
+        match message.type:
+            case MessageType.GRAPHQL:
+                writer.code(message.content, language="graphql")
+            case _:
+                writer.write(message.content)
+
+
 # ----- config -----
 st.set_page_config(
     page_title="PoC of AI Analyzer",
@@ -40,37 +52,42 @@ for message in messages:
             st.write(message.content)
 
 if prompt := st.chat_input("Ask anything about data analysis"):
-    with st.chat_message(MessageRole.USER.value):
-        st.write(prompt)
-    messages.append(
-        MessageSchema(role=MessageRole.USER, type=MessageType.PLAIN, content=prompt)
+    prompt_message = MessageSchema(
+        role=MessageRole.USER, type=MessageType.PLAIN, content=prompt
     )
+    show(prompt_message)
+    messages.append(prompt_message)
 
-    with st.chat_message(MessageRole.ASSISTANT.value):
-        with st.spinner("Generating..."):
-            query = run_graphql_agent_with_log(prompt).output
+    with st.spinner("Generating GraphQL Query..."):
+        query = run_graphql_agent_with_log(prompt).output
+    query_message = MessageSchema(
+        role=MessageRole.ASSISTANT,
+        type=MessageType.GRAPHQL,
+        content=query,
+        expander_text="Show GraphQL Query",
+    )
+    show(query_message)
+    messages.append(query_message)
 
-        with st.expander("Show GraphQL Query"):
-            st.code(query, language="graphql")
-        messages.append(
-            MessageSchema(
-                role=MessageRole.ASSISTANT,
-                type=MessageType.GRAPHQL,
-                content=query,
-            )
-        )
+    df = _get_df_by_query(query)
+    df_message = MessageSchema(
+        role=MessageRole.ASSISTANT,
+        type=MessageType.OTHER,
+        content=df,
+        expander_text="Show DataFrame",
+    )
+    show(df_message)
+    messages.append(df_message)
 
-        df = _get_df_by_query(query)
-        st.write(df)
-        messages.append(
-            MessageSchema(
-                role=MessageRole.ASSISTANT,
-                type=MessageType.OTHER,
-                content=df,
-            )
-        )
+    with st.spinner("Generating Vega-Lite JSON..."):
+        vegalite = run_vegalite_agent_with_log(prompt, df).output.model_dump()
+    vegalite_message = MessageSchema(
+        role=MessageRole.ASSISTANT,
+        type=MessageType.OTHER,
+        content=vegalite,
+        expander_text="Show Vega-Lite JSON",
+    )
+    show(vegalite_message)
+    messages.append(vegalite_message)
 
-        with st.spinner("Generating Vega-Lite JSON..."):
-            schema = run_vegalite_agent_with_log(prompt, df).output.model_dump()
-        st.write(schema)
-        st.vega_lite_chart(df, schema)
+    st.vega_lite_chart(df, vegalite)

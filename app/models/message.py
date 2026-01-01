@@ -20,3 +20,5 @@ class MessageSchema(BaseModel):
     role: MessageRole
     type: MessageType
     content: Any
+    # used by expander
+    expander_text: str | None = None
