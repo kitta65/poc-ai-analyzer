@@ -13,6 +13,9 @@ def _show(message: MessageSchema) -> None:
     match message.type:
         case MessageType.GRAPHQL:
             st.code(message.content, language="graphql")
+        case MessageType.CHART:
+            df, vegalite = message.content
+            st.vega_lite_chart(df, vegalite)
         case _:
             st.write(message.content)
 
@@ -100,5 +103,10 @@ if prompt := st.chat_input("Ask anything about data analysis"):
     show(vegalite_message)
     messages.append(vegalite_message)
 
-    # TODO: enable to show after rerun
-    st.vega_lite_chart(df, vegalite)
+    chart_message = MessageSchema(
+        role=MessageRole.ASSISTANT,
+        type=MessageType.CHART,
+        content=(df, vegalite),
+    )
+    show(chart_message)
+    messages.append(chart_message)

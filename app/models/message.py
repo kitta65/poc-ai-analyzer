@@ -11,6 +11,7 @@ class MessageRole(Enum):
 
 
 class MessageType(Enum):
+    CHART = "chart"
     GRAPHQL = "graphql"
     PLAIN = "plain"
     OTHER = "other"
