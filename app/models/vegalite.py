@@ -9,6 +9,8 @@ class MarkSchema(BaseModel):
 class FieldSchema(BaseModel):
     field: str
     type: Literal["quantitative", "temporal", "ordinal", "nominal"]
+    # https://vega.github.io/vega-lite/docs/aggregate.html#ops
+    aggregate: Literal["sum", "average", "min", "max", "count"] | None = None
 
 
 class EncodingSchema(BaseModel):
