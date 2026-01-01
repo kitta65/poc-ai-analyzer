@@ -1,7 +1,8 @@
 import pandas as pd
-from pydantic_ai import Agent, ModelSettings, RunContext
+from pydantic_ai import capture_run_messages, Agent, ModelSettings, RunContext
 
 from .common import BASE_MODEL
+from .logging import logger
 from ..models.vegalite import VegaLiteSchema
 
 
@@ -30,3 +31,15 @@ Internally prepared as a pandas DataFrame.
 {ctx.deps.dtypes.astype(str).to_dict()}
 ```
 """
+
+
+def run_vegalite_agent_with_log(prompt: str, df: pd.DataFrame):
+    with capture_run_messages() as messages:
+        try:
+            response = vegalite_agent.run_sync(prompt, deps=df)
+        except Exception as e:
+            for m in messages:
+                logger.error(m)
+            raise e
+
+        return response

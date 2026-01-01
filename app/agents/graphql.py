@@ -6,21 +6,22 @@ from graphql import (
     print_schema,
     GraphQLSchema,
 )
-from pydantic_ai import Agent, ModelSettings, ModelRetry
+from pydantic_ai import capture_run_messages, Agent, ModelSettings, ModelRetry
 import requests
 
 from .common import BASE_MODEL
 from ..cube import CUBE_API
+from .logging import logger
 
 
 def get_schema() -> GraphQLSchema:
     query = get_introspection_query(descriptions=True)
-    response = requests.post(f"{ CUBE_API }/graphql", json={"query": query})
+    response = requests.post(f"{CUBE_API}/graphql", json={"query": query})
     return build_client_schema(response.json()["data"])
 
 
 def get_meta():
-    response = requests.post(f"{ CUBE_API }/v1/meta")
+    response = requests.post(f"{CUBE_API}/v1/meta")
     return response.text
 
 
@@ -85,3 +86,15 @@ def validate_graphql_query(output: str) -> str:
         raise ModelRetry(f"Invalid GraphQL query: {errs}")
 
     return output
+
+
+def run_graphql_agent_with_log(prompt: str):
+    with capture_run_messages() as messages:
+        try:
+            response = graphql_agent.run_sync(prompt)
+        except Exception as e:
+            for m in messages:
+                logger.error(m)
+            raise e
+
+        return response
