@@ -40,6 +40,10 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 messages: list[MessageSchema] = st.session_state.messages
 
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+
 if "session_id" not in st.session_state:
     st.session_state.session_id = datetime.now().strftime("%Y%m%d%H%M%S")
     logging.basicConfig(
@@ -62,7 +66,9 @@ if prompt := st.chat_input("Ask anything about data analysis"):
     messages.append(prompt_message)
 
     with st.spinner("Generating..."):
-        response = run_router_agent_with_log(prompt)
+        response = run_router_agent_with_log(prompt, st.session_state.history)
+    latest_history = (st.session_state.history + response.all_messages())[-20:]
+    st.session_state.history = latest_history
 
     if isinstance(response.output, UnableToProceedRequest):
         unable_message = MessageSchema(
