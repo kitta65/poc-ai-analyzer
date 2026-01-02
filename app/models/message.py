@@ -20,6 +20,6 @@ class MessageType(Enum):
 class MessageSchema(BaseModel):
     role: MessageRole
     type: MessageType
-    content: Any
+    content: Any  # TODO: refactor
     # used by expander
     expander_text: str | None = None
