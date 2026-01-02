@@ -1,9 +1,9 @@
-from typing import Any
+from typing import Any, Sequence
 from datetime import datetime
 
 import pandas as pd
 from pydantic import BaseModel
-from pydantic_ai import capture_run_messages, Agent, ModelSettings
+from pydantic_ai import capture_run_messages, Agent, ModelSettings, ModelMessage
 
 from .common import BASE_MODEL
 from .logging import logger
@@ -20,6 +20,10 @@ You will work with the following two agents:
 
 1. GraphQL Agent: This agent generates a GraphQL query to retrieve data from the Cube backend.
 2. VegaLite Agent: This agent generates a Vega-Lite specification to visualize the data retrieved by the GraphQL query.
+
+Other agents cannot reference past interactions. You need to give instructions to other agents based on past interactions.
+The user may give instructions based on past interactions.
+For example, after an instruction like "Show me weekly unique users who placed orders", they might follow up with "Break that down by gender". In this case, for the second instruction, you need to instruct other agents to "Show me weekly unique users who placed orders, broken down by gender".
 
 If the user's description is ambiguous, ask for additional information.
 For example, "I want to visualize the number of active users by day" is not specific enough.
@@ -80,10 +84,10 @@ def get_current_date() -> str:
     return datetime.now().strftime("%Y-%m-%d")
 
 
-def run_router_agent_with_log(prompt: str):
+def run_router_agent_with_log(prompt: str, history: Sequence[ModelMessage] = []):
     with capture_run_messages() as messages:
         try:
-            response = router_agent.run_sync(prompt)
+            response = router_agent.run_sync(prompt, message_history=history)
         except Exception as e:
             for m in messages:
                 logger.error(m)
