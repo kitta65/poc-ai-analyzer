@@ -1,10 +1,8 @@
 import logging
 from datetime import datetime
-from typing import Sequence
 
 import pandas as pd
 import streamlit as st
-from pydantic_ai import ModelMessage
 
 from app.agents.router import run_router_agent_with_log
 from app.models.message import MessageSchema, MessageType, MessageRole
@@ -44,7 +42,6 @@ messages: list[MessageSchema] = st.session_state.messages
 
 if "history" not in st.session_state:
     st.session_state.history = []
-history: Sequence[ModelMessage] = st.session_state.history
 
 
 if "session_id" not in st.session_state:
@@ -69,8 +66,9 @@ if prompt := st.chat_input("Ask anything about data analysis"):
     messages.append(prompt_message)
 
     with st.spinner("Generating..."):
-        response = run_router_agent_with_log(prompt, history)
-    history = response.all_messages()[-10:]  # keep last 10 messages
+        response = run_router_agent_with_log(prompt, st.session_state.history)
+    latest_history = (st.session_state.history + response.all_messages())[-20:]
+    st.session_state.history = latest_history
 
     if isinstance(response.output, UnableToProceedRequest):
         unable_message = MessageSchema(
