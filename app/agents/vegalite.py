@@ -52,6 +52,12 @@ Internally prepared as a pandas DataFrame.
 ```
 {ctx.deps.dtypes.astype(str).to_dict()}
 ```
+
+This is the first few rows of the data.
+
+```
+{ctx.deps.head()}
+```
 """
 
 
