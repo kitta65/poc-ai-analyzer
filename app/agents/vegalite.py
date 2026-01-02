@@ -1,9 +1,31 @@
+from typing import Literal
 import pandas as pd
+from pydantic import BaseModel
 from pydantic_ai import capture_run_messages, Agent, ModelSettings, RunContext
 
-from .common import BASE_MODEL
-from .logging import logger
-from ..models.vegalite import VegaLiteSchema
+from .common import BASE_MODEL, logger
+
+
+class MarkSchema(BaseModel):
+    type: Literal["circle", "bar", "line"]
+
+
+class FieldSchema(BaseModel):
+    field: str
+    type: Literal["quantitative", "temporal", "ordinal", "nominal"]
+    # https://vega.github.io/vega-lite/docs/aggregate.html#ops
+    aggregate: Literal["sum", "average", "min", "max", "count"] | None = None
+
+
+class EncodingSchema(BaseModel):
+    x: FieldSchema
+    y: FieldSchema
+    color: FieldSchema | None = None
+
+
+class VegaLiteSchema(BaseModel):
+    mark: MarkSchema
+    encoding: EncodingSchema
 
 
 INSTRUCTIONS = """\

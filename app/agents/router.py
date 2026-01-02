@@ -5,11 +5,9 @@ import pandas as pd
 from pydantic import BaseModel
 from pydantic_ai import capture_run_messages, Agent, ModelSettings, ModelMessage
 
-from .common import BASE_MODEL
-from .logging import logger
+from .common import BASE_MODEL, logger
 from .graphql import run_graphql_agent_with_log
-from .vegalite import run_vegalite_agent_with_log
-from ..models.vegalite import VegaLiteSchema
+from .vegalite import run_vegalite_agent_with_log, VegaLiteSchema
 from ..cube import get_data_by_query, MODEL_CODE_BLOCKS
 
 

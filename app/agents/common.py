@@ -1,5 +1,8 @@
+import logging
+
 from pydantic_ai import ModelSettings
 from pydantic_ai.models.openai import OpenAIChatModel
+
 
 MODEL_NAME = "gpt-4.1-mini"
 BASE_MODEL = OpenAIChatModel(
@@ -7,3 +10,5 @@ BASE_MODEL = OpenAIChatModel(
     # you can override default settings when instantiating the agent
     settings=ModelSettings(temperature=0.8, max_tokens=500),
 )
+
+logger = logging.getLogger("ai-analyzer.app")

@@ -9,9 +9,8 @@ from graphql import (
 from pydantic_ai import capture_run_messages, Agent, ModelSettings, ModelRetry
 import requests
 
-from .common import BASE_MODEL
-from ..cube import CUBE_API
-from .logging import logger
+from .common import BASE_MODEL, logger
+from ..cube import CUBE_API, MODEL_CODE_BLOCKS
 
 
 def get_schema() -> GraphQLSchema:
@@ -20,13 +19,7 @@ def get_schema() -> GraphQLSchema:
     return build_client_schema(response.json()["data"])
 
 
-def get_meta():
-    response = requests.post(f"{CUBE_API}/v1/meta")
-    return response.text
-
-
 SCHEMA = get_schema()
-META = get_meta()
 INSTRUCTIONS = f"""\
 Your role is to generate GraphQL queries to retrieve data from Cube's GraphQL API.
 Based on the user's objective, create appropriate GraphQL queries.
@@ -57,12 +50,9 @@ query {{
 }}
 ```
 
-Refer to the metadata retrieved from Cube in advance if necessary.
-Descriptions may be included.
+The Cube model definitions are as follows (check the descriptions if necessary):
 
-```
-{META}
-```
+{"\n".join(MODEL_CODE_BLOCKS)}
 """
 
 
